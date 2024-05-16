@@ -5,8 +5,8 @@ plugins {
 }
 
 version = '1.0'
-group = 'me.paypur.craftingtree' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = 'craftingtree'
+group = 'me.paypur.recipetree' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+archivesBaseName = 'recipetree'
 
 // Mojang ships Java 17 to end users in 1.18+, so your mod should target Java 17.
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
@@ -49,7 +49,7 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
 
             // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
-            property 'forge.enabledGameTestNamespaces', 'craftingtree'
+            property 'forge.enabledGameTestNamespaces', 'recipetree'
 
             mods {
                 examplemod {
@@ -66,7 +66,7 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
 
             // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
-            property 'forge.enabledGameTestNamespaces', 'craftingtree'
+            property 'forge.enabledGameTestNamespaces', 'recipetree'
 
             mods {
                 examplemod {
@@ -94,7 +94,7 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
 
             // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
-            property 'forge.enabledGameTestNamespaces', 'craftingtree'
+            property 'forge.enabledGameTestNamespaces', 'recipetree'
 
             mods {
                 examplemod {
@@ -133,13 +133,23 @@ repositories {
     // flatDir {
     //     dir 'libs'
     // }
+
+    maven { // location of the maven that hosts JEI files since January 2023
+        name = "Jared's maven"
+        url = "https://maven.blamejared.com/"
+    }
 }
 
 dependencies {
     // Specify the version of Minecraft to use. If this is any group other than 'net.minecraft', it is assumed
     // that the dep is a ForgeGradle 'patcher' dependency, and its patches will be applied.
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
-    minecraft 'net.minecraftforge:forge:1.18.2-40.2.0'
+    minecraft "net.minecraftforge:forge:${minecraft_version}-40.2.0"
+
+    // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
+    compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}")
+    compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}-forge-api:${jei_version}")
+    runtimeOnly fg.deobf("mezz.jei:jei-${minecraft_version}-forge:${jei_version}")
 
     // Real mod deobf dependency examples - these get remapped to your current mappings
     // compileOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}:api") // Adds JEI API as a compile dependency
