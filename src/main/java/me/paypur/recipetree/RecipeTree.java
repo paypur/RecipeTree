@@ -1,22 +1,15 @@
 package me.paypur.recipetree;
 
-import com.mojang.logging.LogUtils;
+import me.paypur.recipetree.client.JeiHelper;
 import me.paypur.recipetree.client.Keybinds;
-import me.paypur.recipetree.gui.RecipeTreeScreen;
+import me.paypur.recipetree.client.gui.RecipeTreeScreen;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.Block;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-
-
-import java.util.logging.Logger;
 
 import static me.paypur.recipetree.RecipeTree.MOD_ID;
 
@@ -38,11 +31,15 @@ public class RecipeTree {
         @SubscribeEvent
         public static void clientTick(TickEvent.ClientTickEvent event) {
             if (Keybinds.RecipeTreeUses.consumeClick()) {
+                if (JeiHelper.jeiRuntime == null) {
+                    return;
+                }
+
                 Minecraft minecraft = Minecraft.getInstance();
-                ItemStack item = minecraft.player.getItemInHand(InteractionHand.MAIN_HAND);
 
-                minecraft.player.displayClientMessage(new TextComponent(item.toString()), false);
+//                ItemStack itemStack = Help.jeiRuntime.getRecipesGui().getIngredientUnderMouse(VanillaTypes.ITEM_STACK);
 
+                ItemStack item = minecraft.player.getMainHandItem();
                 minecraft.setScreen(new RecipeTreeScreen(item));
             }
         }

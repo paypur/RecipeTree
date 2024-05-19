@@ -6,7 +6,6 @@ import net.minecraftforge.client.ClientRegistry;
 import net.minecraftforge.client.settings.KeyConflictContext;
 
 public final class Keybinds {
-//    public static final Keybinds INSTANCE = new Keybinds();
     public static final KeyMapping RecipeTreeUses = new KeyMapping(
                 "key.recipetree.uses",
                 KeyConflictContext.GUI,
@@ -14,7 +13,6 @@ public final class Keybinds {
                 "key.categories.recipetree"
     );
 
-//    private Keybinds() {}
 
     public static void init() {
         ClientRegistry.registerKeyBinding(RecipeTreeUses);
