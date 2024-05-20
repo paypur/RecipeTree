@@ -5,7 +5,7 @@ import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.runtime.IJeiRuntime;
 import net.minecraft.resources.ResourceLocation;
 
-import static me.paypur.recipetree.RecipeTree.MOD_ID;
+import static me.paypur.recipetree.RecipeTreeMain.MOD_ID;
 
 @JeiPlugin
 public class JeiHelper implements IModPlugin  {

@@ -11,14 +11,14 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
-import static me.paypur.recipetree.RecipeTree.MOD_ID;
+import static me.paypur.recipetree.RecipeTreeMain.MOD_ID;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(MOD_ID)
-public class RecipeTree {
+public class RecipeTreeMain {
     public static final String MOD_ID = "recipetree";
 
-    @Mod.EventBusSubscriber(modid = RecipeTree.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+    @Mod.EventBusSubscriber(modid = RecipeTreeMain.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public final class ClientModHandler {
         @SubscribeEvent
         public static void clientSetup(FMLClientSetupEvent event) {
@@ -26,7 +26,7 @@ public class RecipeTree {
         }
     }
 
-    @Mod.EventBusSubscriber(modid = RecipeTree.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
+    @Mod.EventBusSubscriber(modid = RecipeTreeMain.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
     public final class ClientForgeHandler {
         @SubscribeEvent
         public static void clientTick(TickEvent.ClientTickEvent event) {
