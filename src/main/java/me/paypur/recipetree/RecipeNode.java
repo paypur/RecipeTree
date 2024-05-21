@@ -7,20 +7,22 @@ import java.util.stream.Collectors;
 
 public class RecipeNode {
 
-    private final ItemStack item;
+    private final List<ItemStack> item;
     private final int depth;
 
     private final List<RecipeNode> children = new ArrayList<>();
     public RecipeNode(ItemStack item) {
-        this.item = item;
-        this.depth = 0;
+        this(item, 0);
     }
     public RecipeNode(ItemStack item, int depth) {
+        this(List.of(item), depth);
+    }
+    public RecipeNode(List<ItemStack> item, int depth) {
         this.item = item;
         this.depth = depth;
     }
 
-    public ItemStack getResult() {
+    public List<ItemStack> getItems() {
         return item;
     }
 
@@ -34,6 +36,8 @@ public class RecipeNode {
 
     @Override
     public String toString() {
+        // ├─ │ ─ └─
+        // TODO: has a few issues still
         return String.format(item.toString() + children.stream().map(child -> "\n" + "│   ".repeat(depth) + "├─── " + child.toString()).collect(Collectors.joining("")));
     }
 }

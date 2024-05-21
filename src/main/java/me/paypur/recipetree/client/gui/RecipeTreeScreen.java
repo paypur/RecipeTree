@@ -33,7 +33,7 @@ public class RecipeTreeScreen extends Screen {
     protected void init() {
         super.init();
 
-        RecipeTreeWrapper tree = new RecipeTreeWrapper(new RecipeNode(BASE_ITEM), RecipeIngredientRole.INPUT, 4);
+        RecipeTreeWrapper tree = new RecipeTreeWrapper(new RecipeNode(BASE_ITEM), RecipeIngredientRole.OUTPUT, 4);
         System.out.println(tree);
 
 

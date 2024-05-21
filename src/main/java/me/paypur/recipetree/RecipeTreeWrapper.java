@@ -15,6 +15,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -48,17 +49,16 @@ public class RecipeTreeWrapper {
 
     public void setTreeDepth(int treeDepth) {
         this.TREE_DEPTH = treeDepth > 0 ? treeDepth : this.TREE_DEPTH;
-        // TODO: need to update tree
+        updateTree();
     }
 
 
-    // TODO: should probably be called build tree
     private void buildTree() {
         int depth = 0;
         while (depth <= TREE_DEPTH) {
             List<RecipeNode> newLeafNodes = new ArrayList<>();
             for (RecipeNode node : LEAF_NODES) {
-                addUses(node, depth + 1);
+                addChildren(node, depth + 1);
                 newLeafNodes.addAll(node.getChildren());
             }
             LEAF_NODES = newLeafNodes;
@@ -67,43 +67,65 @@ public class RecipeTreeWrapper {
     }
 
     private void updateTree() {
-
+        // TODO: need to update tree
     }
 
-    private void addUses(RecipeNode recipeNode, int depth) {
-        if (recipeNode.getResult() == null) {
+    private void addChildren(RecipeNode recipeNode, int depth) {
+        if (recipeNode.getItems().isEmpty()) {
             return;
         }
 
-        IFocus<ItemStack> focus = JeiHelper.jeiRuntime.getJeiHelpers().getFocusFactory().createFocus(ingredientRole, VanillaTypes.ITEM, recipeNode.getResult());
-        Stream<RecipeType<?>> allRecipeTypes = recipeManager.createRecipeCategoryLookup().get().map(IRecipeCategory::getRecipeType);
-        List<?> uses = allRecipeTypes.flatMap(recipeType -> recipeManager.createRecipeLookup(recipeType).limitFocus(List.of(focus)).get()).distinct().toList();
+        for (ItemStack item : recipeNode.getItems()) {
+            IFocus<ItemStack> focus = JeiHelper.jeiRuntime.getJeiHelpers().getFocusFactory().createFocus(ingredientRole, VanillaTypes.ITEM, item);
+            Stream<RecipeType<?>> allRecipeTypes = recipeManager.createRecipeCategoryLookup().get().map(IRecipeCategory::getRecipeType);
+            List<?> recipes = allRecipeTypes.flatMap(recipeType -> recipeManager.createRecipeLookup(recipeType).limitFocus(List.of(focus)).get()).distinct().toList();
 
-        for (Object use : uses) {
-            if (use instanceof Recipe<?> recipe) {
-                recipeNode.addChild(new RecipeNode(recipe.getResultItem(), depth));
-            } else if (use instanceof IJeiAnvilRecipe recipe) {
-                // avoid cycles
-                if (!recipe.getLeftInputs().get(0).getItem().equals(recipe.getOutputs().get(0).getItem())
-                    && !recipe.getRightInputs().get(0).getItem().equals(recipe.getOutputs().get(0).getItem())) {
-                    recipeNode.addChild(new RecipeNode(recipe.getOutputs().get(0), depth));
-                }
-            } else if (use instanceof IJeiBrewingRecipe recipe) {
-                recipeNode.addChild(new RecipeNode(recipe.getPotionOutput(), depth));
-            // cases where there is no output
-            } else if (use instanceof IJeiCompostingRecipe recipe) {
-            } else if (use instanceof IJeiFuelingRecipe recipe) {
-            } else {
-                System.err.println("Unhandled recipe " + use);
+            if (ingredientRole.equals(RecipeIngredientRole.INPUT)) {
+                addOutputs(recipeNode, recipes, depth);
+            } else if (ingredientRole.equals(RecipeIngredientRole.OUTPUT)) {
+                addInputs(recipeNode, recipes, depth);
             }
         }
+    }
 
+    private void addOutputs(RecipeNode recipeNode, List<?> recipes, int depth) {
+        for (Object object : recipes) {
+            if (object instanceof Recipe<?> recipe) {
+                // TODO: does not work for upgrade recipes
+                recipeNode.addChild(new RecipeNode(recipe.getResultItem(), depth));
+            } else if (object instanceof IJeiBrewingRecipe recipe) {
+                recipeNode.addChild(new RecipeNode(recipe.getPotionOutput(), depth));
+            // cases where there is no output or cycle
+            } else if (object instanceof IJeiAnvilRecipe || object instanceof IJeiCompostingRecipe || object instanceof IJeiFuelingRecipe) {
+            } else {
+                System.err.println("Unhandled recipe " + object);
+            }
+        }
+    }
+
+    private void addInputs(RecipeNode recipeNode, List<?> recipes, int depth) {
+        for (Object object : recipes) {
+            if (object instanceof Recipe<?> recipe) {
+                // TODO: does not work for upgrade recipes
+                recipeNode.addChild(new RecipeNode(recipe.getIngredients().stream()
+                        .filter(ingredient -> ingredient.getItems().length != 0)
+                        // TODO: only gets first tag entry I think
+                        .map(ingredient -> ingredient.getItems()[0])
+                        .distinct()
+                        .toList(), depth));
+            } else if (object instanceof IJeiBrewingRecipe recipe) {
+                recipeNode.addChild(new RecipeNode(Stream.of(recipe.getPotionInputs(), recipe.getIngredients()).flatMap(Collection::stream).toList(), depth));
+            // cases where there is no output
+            } else if (object instanceof IJeiAnvilRecipe || object instanceof IJeiCompostingRecipe || object instanceof IJeiFuelingRecipe) {
+            } else {
+                System.err.println("Unhandled recipe " + object);
+            }
+        }
     }
 
     @Override
     public String toString() {
         return ROOT_NODE.toString();
-//        ├─ │ ─ └─
     }
 
 }
