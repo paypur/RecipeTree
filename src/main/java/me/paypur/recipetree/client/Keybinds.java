@@ -13,9 +13,16 @@ public final class Keybinds {
                 "key.categories.recipetree"
     );
 
+    public static final KeyMapping RecipeTreeRecipes = new KeyMapping(
+                "key.recipetree.recipes",
+                KeyConflictContext.GUI,
+                InputConstants.getKey(InputConstants.KEY_Y, -1),
+                "key.categories.recipetree"
+    );
 
     public static void init() {
         ClientRegistry.registerKeyBinding(RecipeTreeUses);
+        ClientRegistry.registerKeyBinding(RecipeTreeRecipes);
     }
 
 }

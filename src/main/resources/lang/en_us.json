@@ -1,4 +1,5 @@
 {
   "key.categories.recipetree": "Recipe Tree",
-  "key.recipetree.uses": "Shows a usage tree of a given item"
+  "key.recipetree.uses": "Shows a usage tree of a given item",
+  "key.recipetree.recipes": "Shows a recipe tree of a given item"
 }

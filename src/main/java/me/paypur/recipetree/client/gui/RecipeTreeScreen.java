@@ -13,6 +13,8 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 
+import java.util.Arrays;
+
 import static me.paypur.recipetree.RecipeTreeMain.MOD_ID;
 
 
@@ -22,20 +24,23 @@ public class RecipeTreeScreen extends Screen {
     private final int WIDTH = 128;
     private final int HEIGHT = 128;
     private final ItemStack BASE_ITEM;
+    private final RecipeIngredientRole RECIPE_ROLE;
     private final ResourceLocation BACKGROUND = new ResourceLocation(MOD_ID, "textures/gui/background.png");
+    private RecipeTreeWrapper recipeTree;
 
-    public RecipeTreeScreen(ItemStack item) {
+    private int lineOffset = 0;
+
+    public RecipeTreeScreen(ItemStack item, RecipeIngredientRole recipeRole) {
         super(TITLE);
         this.BASE_ITEM = item;
+        this.RECIPE_ROLE = recipeRole;
     }
 
     @Override
     protected void init() {
         super.init();
 
-        RecipeTreeWrapper tree = new RecipeTreeWrapper(new RecipeNode(BASE_ITEM), RecipeIngredientRole.OUTPUT, 4);
-        System.out.println(tree);
-
+        recipeTree = new RecipeTreeWrapper(new RecipeNode(BASE_ITEM, null), RECIPE_ROLE, 5);
 
         // calculate recipes
 
@@ -64,14 +69,22 @@ public class RecipeTreeScreen extends Screen {
 
         Minecraft minecraft = getMinecraft();
 
-        int l = 0;
-//        drawString(pPoseStack, minecraft.font,  text, 0, 0, 0x3f2398);
+        int l = lineOffset * 10;
+
+        for (String line : recipeTree.toString().split("\n")) {
+            drawString(pPoseStack, minecraft.font,  line, 0, l, 0x3f2398);
+            l += 10;
+        }
 
         // renders all the widgets
         super.render(pPoseStack, pMouseX, pMouseY, pPartialTick);
     }
 
-
+    @Override
+    public boolean mouseScrolled(double pMouseX, double pMouseY, double pDelta) {
+        lineOffset += (int) pDelta;
+        return super.mouseScrolled(pMouseX, pMouseY, pDelta);
+    }
 
     @Override
     public boolean isPauseScreen() {

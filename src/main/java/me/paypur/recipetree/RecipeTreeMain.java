@@ -3,8 +3,10 @@ package me.paypur.recipetree;
 import me.paypur.recipetree.client.JeiHelper;
 import me.paypur.recipetree.client.Keybinds;
 import me.paypur.recipetree.client.gui.RecipeTreeScreen;
+import mezz.jei.api.recipe.RecipeIngredientRole;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -31,16 +33,19 @@ public class RecipeTreeMain {
         @SubscribeEvent
         public static void clientTick(TickEvent.ClientTickEvent event) {
             if (Keybinds.RecipeTreeUses.consumeClick()) {
-                if (JeiHelper.jeiRuntime == null) {
-                    return;
-                }
-
                 Minecraft minecraft = Minecraft.getInstance();
-
 //                ItemStack itemStack = Help.jeiRuntime.getRecipesGui().getIngredientUnderMouse(VanillaTypes.ITEM_STACK);
-
                 ItemStack item = minecraft.player.getMainHandItem();
-                minecraft.setScreen(new RecipeTreeScreen(item));
+                if (!item.getItem().equals(Items.AIR)) {
+                    minecraft.setScreen(new RecipeTreeScreen(item, RecipeIngredientRole.INPUT));
+                }
+            }
+            else if (Keybinds.RecipeTreeRecipes.consumeClick()) {
+                Minecraft minecraft = Minecraft.getInstance();
+                ItemStack item = minecraft.player.getMainHandItem();
+                if (!item.getItem().equals(Items.AIR)) {
+                    minecraft.setScreen(new RecipeTreeScreen(item, RecipeIngredientRole.OUTPUT));
+                }
             }
         }
     }
