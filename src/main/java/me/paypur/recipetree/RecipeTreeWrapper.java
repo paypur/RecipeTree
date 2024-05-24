@@ -46,19 +46,19 @@ public class RecipeTreeWrapper {
         return TREE_DEPTH;
     }
 
-    public void setTreeDepth(int treeDepth) {
-        this.TREE_DEPTH = treeDepth > 0 ? treeDepth : this.TREE_DEPTH;
+    public void increaseTreeDepth() {
+        this.TREE_DEPTH += 1;
         updateTree();
     }
 
 
     private void buildTree() {
         int depth = 0;
-        while (depth <= TREE_DEPTH) {
+        while (depth < TREE_DEPTH) {
             List<RecipeNode> newLeafNodes = new ArrayList<>();
-            for (RecipeNode node : LEAF_NODES) {
-                addChildren(node, depth + 1);
-                newLeafNodes.addAll(node.getChildren());
+            for (RecipeNode leaf : LEAF_NODES) {
+                addChildren(leaf);
+                newLeafNodes.addAll(leaf.getChildren());
             }
             LEAF_NODES = newLeafNodes;
             depth++;
@@ -67,9 +67,12 @@ public class RecipeTreeWrapper {
 
     private void updateTree() {
         // TODO: need to update tree
+        for (RecipeNode leaf : LEAF_NODES) {
+
+        }
     }
 
-    private void addChildren(RecipeNode parentNode, int depth) {
+    private void addChildren(RecipeNode parentNode) {
         if (parentNode.getItems().isEmpty()) {
             return;
         }
@@ -80,20 +83,20 @@ public class RecipeTreeWrapper {
             Stream<RecipeType<?>> allRecipeTypes = recipeManager.createRecipeCategoryLookup().get().map(IRecipeCategory::getRecipeType);
             List<?> recipes = allRecipeTypes.flatMap(recipeType -> recipeManager.createRecipeLookup(recipeType).limitFocus(List.of(focus)).get()).distinct().toList();
             switch (ingredientRole) {
-                case INPUT -> addOutputs(parentNode, recipes, depth);
-                case OUTPUT -> addInputs(parentNode, recipes, depth);
+                case INPUT -> addOutputs(recipes, parentNode);
+                case OUTPUT -> addInputs(recipes, parentNode);
             }
         }
     }
 
-    private void addOutputs(RecipeNode parentNode, List<?> recipes, int depth) {
+    private void addOutputs(List<?> recipes, RecipeNode parentNode) {
         for (Object object : recipes) {
             RecipeNode childNode;
             if (object instanceof Recipe<?> recipe) {
                 // TODO: does not work for upgrade recipes
-                childNode = new RecipeNode(recipe.getResultItem(), depth, parentNode);
+                childNode = new RecipeNode(recipe.getResultItem(), parentNode);
             } else if (object instanceof IJeiBrewingRecipe recipe) {
-                childNode = new RecipeNode(recipe.getPotionOutput(), depth, parentNode);
+                childNode = new RecipeNode(recipe.getPotionOutput(), parentNode);
             // cases where there is no output or cycle
             } else if (object instanceof IJeiAnvilRecipe || object instanceof IJeiCompostingRecipe || object instanceof IJeiFuelingRecipe) {
                 return;
@@ -107,7 +110,7 @@ public class RecipeTreeWrapper {
         }
     }
 
-    private void addInputs(RecipeNode parentNode, List<?> recipes, int depth) {
+    private void addInputs(List<?> recipes, RecipeNode parentNode) {
         for (Object object : recipes) {
             RecipeNode childNode;
             if (object instanceof Recipe<?> recipe) {
@@ -117,9 +120,9 @@ public class RecipeTreeWrapper {
                         // TODO: only gets first tag entry I think
                         .map(ingredient -> ingredient.getItems()[0])
                         .distinct()
-                        .toList(), depth, parentNode);
+                        .toList(), parentNode);
             } else if (object instanceof IJeiBrewingRecipe recipe) {
-                childNode = new RecipeNode(Stream.of(recipe.getPotionInputs(), recipe.getIngredients()).flatMap(Collection::stream).toList(), depth, parentNode);
+                childNode = new RecipeNode(Stream.of(recipe.getPotionInputs(), recipe.getIngredients()).flatMap(Collection::stream).toList(), parentNode);
             // cases where there is no output
             } else if (object instanceof IJeiAnvilRecipe || object instanceof IJeiCompostingRecipe || object instanceof IJeiFuelingRecipe) {
                 return;

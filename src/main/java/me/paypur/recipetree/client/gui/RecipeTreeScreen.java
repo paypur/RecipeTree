@@ -12,9 +12,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-
-import java.util.Arrays;
-
 import static me.paypur.recipetree.RecipeTreeMain.MOD_ID;
 
 
@@ -27,6 +24,7 @@ public class RecipeTreeScreen extends Screen {
     private final RecipeIngredientRole RECIPE_ROLE;
     private final ResourceLocation BACKGROUND = new ResourceLocation(MOD_ID, "textures/gui/background.png");
     private RecipeTreeWrapper recipeTree;
+    private String recipeTreeString;
 
     private int lineOffset = 0;
 
@@ -41,6 +39,7 @@ public class RecipeTreeScreen extends Screen {
         super.init();
 
         recipeTree = new RecipeTreeWrapper(new RecipeNode(BASE_ITEM, null), RECIPE_ROLE, 5);
+        recipeTreeString = recipeTree.toString();
 
         // calculate recipes
 
@@ -71,7 +70,7 @@ public class RecipeTreeScreen extends Screen {
 
         int l = lineOffset * 10;
 
-        for (String line : recipeTree.toString().split("\n")) {
+        for (String line : recipeTreeString.split("\n")) {
             drawString(pPoseStack, minecraft.font,  line, 0, l, 0x3f2398);
             l += 10;
         }

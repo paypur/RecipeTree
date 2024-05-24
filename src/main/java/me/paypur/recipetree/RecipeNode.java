@@ -8,17 +8,12 @@ import java.util.stream.Collectors;
 public class RecipeNode {
 
     private List<ItemStack> items;
-    private final int depth;
     private final RecipeNode parent;
-
     private final List<RecipeNode> children = new ArrayList<>();
     public RecipeNode(ItemStack items, RecipeNode parent) {
-        this(items, 0, parent);
+        this(List.of(items), parent);
     }
-    public RecipeNode(ItemStack items, int depth, RecipeNode parent) {
-        this(List.of(items), depth, parent);
-    }
-    public RecipeNode(List<ItemStack> items, int depth, RecipeNode parent) {
+    public RecipeNode(List<ItemStack> items, RecipeNode parent) {
         List<ItemStack> deduplicatedItems = new ArrayList<>(items);
         RecipeNode ancestor = parent;
         while (ancestor != null) {
@@ -26,7 +21,6 @@ public class RecipeNode {
             ancestor = ancestor.getParent();
         }
         this.items = deduplicatedItems;
-        this.depth = depth;
         this.parent = parent;
     }
 
@@ -50,6 +44,13 @@ public class RecipeNode {
         return parent;
     }
 
+    public boolean isLast() {
+        if (parent == null) {
+            return false;
+        }
+        return this.equals(parent.getChildren().get(parent.getChildren().size() - 1));
+    }
+
     public List<RecipeNode> getChildren() {
         return children;
     }
@@ -60,8 +61,10 @@ public class RecipeNode {
 
     @Override
     public String toString() {
-        // ├─ │ ─ └─
-        // TODO: has a few issues still
-        return String.format(items.toString() + children.stream().map(child -> "\n" + "│   ".repeat(depth) + "├─── " + child.toString()).collect(Collectors.joining("")));
+        return items.toString() + children.stream().map(child -> "\n" +
+                Arrays.stream(child.toString().split("\n"))
+                        .map(sub -> (child.isLast() ? (sub.contains("├") || sub.contains("└") ? "    " : "└───") : (sub.contains("├") || sub.contains("└") ? "│   " : "├───")) + sub)
+                        .collect(Collectors.joining("\n")))
+                .collect(Collectors.joining(""));
     }
 }
