@@ -1,5 +1,6 @@
 package me.paypur.recipetree;
 
+import com.mojang.logging.LogUtils;
 import me.paypur.recipetree.client.JeiHelper;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.recipe.IFocus;
@@ -12,9 +13,12 @@ import mezz.jei.api.recipe.vanilla.IJeiBrewingRecipe;
 import mezz.jei.api.recipe.vanilla.IJeiCompostingRecipe;
 import mezz.jei.api.recipe.vanilla.IJeiFuelingRecipe;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.UpgradeRecipe;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
@@ -73,12 +77,12 @@ public class RecipeTreeWrapper {
     }
 
     private void addChildren(RecipeNode parentNode) {
-        if (parentNode.getItems().isEmpty()) {
+        if (parentNode.getItems().isEmpty() || parentNode.getItems().stream().map(i -> i.getItem().equals(Items.AIR)).findFirst().get()) {
             return;
         }
 
         for (ItemStack item : parentNode.getItems()) {
-            IFocus<ItemStack> focus = JeiHelper.jeiRuntime.getJeiHelpers().getFocusFactory().createFocus(ingredientRole, VanillaTypes.ITEM, item);
+            IFocus<ItemStack> focus = JeiHelper.jeiRuntime.getJeiHelpers().getFocusFactory().createFocus(ingredientRole, VanillaTypes.ITEM_STACK, item);
             IRecipeManager recipeManager = JeiHelper.jeiRuntime.getRecipeManager();
             Stream<RecipeType<?>> allRecipeTypes = recipeManager.createRecipeCategoryLookup().get().map(IRecipeCategory::getRecipeType);
             List<?> recipes = allRecipeTypes.flatMap(recipeType -> recipeManager.createRecipeLookup(recipeType).limitFocus(List.of(focus)).get()).distinct().toList();
@@ -90,31 +94,36 @@ public class RecipeTreeWrapper {
     }
 
     private void addOutputs(List<?> recipes, RecipeNode parentNode) {
+        RecipeNode childNode;
         for (Object object : recipes) {
-            RecipeNode childNode;
             if (object instanceof Recipe<?> recipe) {
-                // TODO: does not work for upgrade recipes
+                // UpgradeRecipe handled here
                 childNode = new RecipeNode(recipe.getResultItem(), parentNode);
             } else if (object instanceof IJeiBrewingRecipe recipe) {
                 childNode = new RecipeNode(recipe.getPotionOutput(), parentNode);
             // cases where there is no output or cycle
             } else if (object instanceof IJeiAnvilRecipe || object instanceof IJeiCompostingRecipe || object instanceof IJeiFuelingRecipe) {
-                return;
+                continue;
             } else {
-                System.err.println("Unhandled recipe " + object);
-                return;
+                LogUtils.getLogger().error("Unhandled recipe " + object);
+                continue;
             }
+
             if (!childNode.getItems().isEmpty()) {
                 parentNode.addChild(childNode);
+            } else {
+                LogUtils.getLogger().error(object + "has no items!");
             }
         }
     }
 
     private void addInputs(List<?> recipes, RecipeNode parentNode) {
+        RecipeNode childNode;
         for (Object object : recipes) {
-            RecipeNode childNode;
-            if (object instanceof Recipe<?> recipe) {
-                // TODO: does not work for upgrade recipes
+            if (object instanceof UpgradeRecipe recipe) {
+                childNode = new RecipeNode(Stream.concat(Arrays.stream(recipe.base.getItems()), Arrays.stream(recipe.addition.getItems())).toList(), parentNode);
+            } else if (object instanceof Recipe<?> recipe) {
+                // TODO: need to support fluids
                 childNode = new RecipeNode(recipe.getIngredients().stream()
                         .filter(ingredient -> ingredient.getItems().length != 0)
                         // TODO: only gets first tag entry I think
@@ -125,13 +134,16 @@ public class RecipeTreeWrapper {
                 childNode = new RecipeNode(Stream.of(recipe.getPotionInputs(), recipe.getIngredients()).flatMap(Collection::stream).toList(), parentNode);
             // cases where there is no output
             } else if (object instanceof IJeiAnvilRecipe || object instanceof IJeiCompostingRecipe || object instanceof IJeiFuelingRecipe) {
-                return;
+                continue;
             } else {
-                System.err.println("Unhandled recipe " + object);
-                return;
+                LogUtils.getLogger().error("Unhandled recipe " + object);
+                continue;
             }
+
             if (!childNode.getItems().isEmpty()) {
                 parentNode.addChild(childNode);
+            } else {
+                LogUtils.getLogger().error(object + "has no items!");
             }
         }
     }

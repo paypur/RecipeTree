@@ -28,7 +28,7 @@ minecraft {
     // Simply re-run your setup task after changing the mappings to update your workspace.
     mappings channel: 'parchment', version: '2022.11.06-1.18.2'
 
-    // accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg') // Currently, this location cannot be changed from the default.
+    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg') // Currently, this location cannot be changed from the default.
 
     // Default run configurations.
     // These can be tweaked, removed, or duplicated as needed.
@@ -138,6 +138,10 @@ repositories {
         name = "Jared's maven"
         url = "https://maven.blamejared.com/"
     }
+    maven { // tcon
+        name 'DVS1 Maven FS'
+        url 'https://dvs1.progwml6.com/files/maven'
+    }
 }
 
 dependencies {
@@ -150,6 +154,12 @@ dependencies {
     compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}")
     compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}-forge-api:${jei_version}")
     runtimeOnly fg.deobf("mezz.jei:jei-${minecraft_version}-forge:${jei_version}")
+
+//    compileOnly fg.deobf("blusunrize.immersiveengineering:ImmersiveEngineering:${minecraft_version}-${ie_version}:api")
+//    runtimeOnly fg.deobf("blusunrize.immersiveengineering:ImmersiveEngineering:${minecraft_version}-${ie_version}")
+
+    implementation fg.deobf("slimeknights.mantle:Mantle:${minecraft_version}-${mantle_version}")
+    implementation fg.deobf("slimeknights.tconstruct:TConstruct:${minecraft_version}-${tconstruct_version}")
 
     // Real mod deobf dependency examples - these get remapped to your current mappings
     // compileOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}:api") // Adds JEI API as a compile dependency

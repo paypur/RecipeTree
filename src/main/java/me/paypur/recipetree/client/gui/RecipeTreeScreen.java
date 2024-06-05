@@ -38,8 +38,9 @@ public class RecipeTreeScreen extends Screen {
     protected void init() {
         super.init();
 
-        recipeTree = new RecipeTreeWrapper(new RecipeNode(BASE_ITEM, null), RECIPE_ROLE, 5);
+        recipeTree = new RecipeTreeWrapper(new RecipeNode(BASE_ITEM, null), RECIPE_ROLE, 1);
         recipeTreeString = recipeTree.toString();
+        System.out.println(recipeTreeString);
 
         // calculate recipes
 
